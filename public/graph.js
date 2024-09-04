@@ -1,5 +1,5 @@
 window.onload = function () {
-    fetch('graph-data.json')
+    fetch('public/graph-data.json')
         .then(response => response.json())
         .then(data => {
 
