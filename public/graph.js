@@ -9,11 +9,12 @@ window.onload = function () {
             data.nodes.forEach(node => {
                 graph.addNode(node.id, {
                     label: node.label,
-                    position: "WIP",
-                    department: "WIP",
+                    position: "Position",
+                    department: "Department",
                     x: Math.random(),
                     y: Math.random(),
-                    size: 5
+                    size: 5,
+                    // color: "#e22653",
                 });
             });
             data.edges.forEach(edge => {
@@ -31,12 +32,12 @@ window.onload = function () {
             // Instantiate sigma.js and render the graph
             const renderer = new Sigma(graph, document.getElementById("sigma-container"));
 
-            // State for tracking hover, search, and selections
+
+
+            // State for tracking hover
             const state = {
                 hoveredNode: undefined,
-                searchQuery: "",
                 selectedNode: undefined,
-                suggestions: undefined,
                 hoveredNeighbors: undefined,
             };
 
@@ -56,19 +57,25 @@ window.onload = function () {
             renderer.on("enterNode", ({ node }) => setHoveredNode(node));
             renderer.on("leaveNode", () => setHoveredNode(undefined));
 
-            // Node reducer: dynamically change node appearance based on hover and search
+            // Node reducer: dynamically change node appearance based on hover
             renderer.setSetting("nodeReducer", (node, data) => {
                 const res = { ...data };
+
+                // If the node is not hovered and is not a neighbor of the hovered node, dim it
                 if (state.hoveredNeighbors && !state.hoveredNeighbors.has(node) && state.hoveredNode !== node) {
                     res.label = "";
                     res.color = "#f6f6f6";
                 }
-                if (state.selectedNode === node) {
+                // If hovered node
+                if (state.hoveredNode === node) {
                     res.highlighted = true;
-                } else if (state.suggestions && !state.suggestions.has(node)) {
-                    res.label = "";
-                    res.color = "#f6f6f6";
-                }
+                    // Display position and department on the label
+                    const position = graph.getNodeAttribute(node, "position");
+                    const department = graph.getNodeAttribute(node, "department");
+                    if(position & position != "")
+                        res.label = `${data.label} | ${position} | ${department}`;
+                } 
+
                 return res;
             });
 
@@ -76,9 +83,6 @@ window.onload = function () {
             renderer.setSetting("edgeReducer", (edge, data) => {
                 const res = { ...data };
                 if (state.hoveredNode && !graph.hasExtremity(edge, state.hoveredNode)) {
-                    res.hidden = true;
-                }
-                if (state.suggestions && (!state.suggestions.has(graph.source(edge)) || !state.suggestions.has(graph.target(edge)))) {
                     res.hidden = true;
                 }
                 return res;
