@@ -1,0 +1,4 @@
+Pursuant to the Illinois Freedom of Information Act, I hereby request email logs for all emails sent and received by KOURTNEY A FREEMAN, HAMID R TABATABAEE ZAVAREH, VICTORIA OJIGWE and ROBERT W STACHURA between 7/22/2024 and 7/26/2024. If possible, please provide this data in a spreadsheet or structured data format (XLS, XLSX, CSV, JSON, etc.). 
+I am only interested in the city employees included on the emails; I do not need the email content itself. As such, I have a few qualifications for my request to expedite the review of the records and to reduce the burden my request imposes upon the city: 
+- For each record, please only include the 'to', 'from', 'cc', 'bcc' email fields and the email timestamp. Do not include the email subject, body or attachments. 
+- Please remove any private email addresses (email addresses that do not end with “@cityofchicago.org”) from the records.

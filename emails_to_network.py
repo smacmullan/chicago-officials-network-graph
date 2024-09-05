@@ -2,7 +2,7 @@ import pandas as pd
 import json
 
 # Load the CSV file
-df = pd.read_csv('OBM sample email data.csv')
+df = pd.read_csv('data/OBM sample email data.csv')
 
 # Create a set of nodes (unique email addresses)
 nodes = set(df['Email From'].dropna().unique())
