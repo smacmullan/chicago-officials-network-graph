@@ -14,7 +14,7 @@ window.onload = function () {
                     x: Math.random(),
                     y: Math.random(),
                     size: 5,
-                    // color: "#e22653",
+                    // color: getDepartmentColor("BOARD OF ETHICS"),
                 });
             });
             data.edges.forEach(edge => {
@@ -72,9 +72,9 @@ window.onload = function () {
                     // Display position and department on the label
                     const position = graph.getNodeAttribute(node, "position");
                     const department = graph.getNodeAttribute(node, "department");
-                    if(position & position != "")
+                    if (position && position != "")
                         res.label = `${data.label} | ${position} | ${department}`;
-                } 
+                }
 
                 return res;
             });
@@ -92,3 +92,48 @@ window.onload = function () {
         .catch(error => console.error('Error loading the graph data:', error));
 };
 
+const departmentColors = {
+    "BOARD OF ELECTION COMMISSIONERS": "#FF5733",
+    "BOARD OF ETHICS": "#33FF57",
+    "CHICAGO ANIMAL CARE AND CONTROL": "#5733FF",
+    "CHICAGO COMMISSION ON HUMAN RELATIONS": "#FF33A5",
+    "CHICAGO DEPARTMENT OF AVIATION": "#33A5FF",
+    "CHICAGO DEPARTMENT OF PUBLIC HEALTH": "#FF9933",
+    "CHICAGO DEPARTMENT OF TRANSPORTATION": "#9933FF",
+    "CHICAGO FIRE DEPARTMENT": "#ff2121",
+    "CHICAGO POLICE BOARD": "#999999",
+    "CHICAGO POLICE DEPARTMENT": "#3f55ff",
+    "CHICAGO PUBLIC LIBRARY": "#999999",
+    "CITY COUNCIL": "#999999",
+    "CITY TREASURER'S OFFICE": "#999999",
+    "CIVILIAN OFFICE OF POLICE ACCOUNTABILITY": "#999999",
+    "COMMUNITY COMMISSION FOR PUBLIC SAFETY AND ACCOUNTABILITY": "#999999",
+    "DEPARTMENT OF ADMINISTRATIVE HEARING": "#999999",
+    "DEPARTMENT OF BUILDINGS": "#999999",
+    "DEPARTMENT OF BUSINESS AFFAIRS AND CONSUMER PROTECTION": "#999999",
+    "DEPARTMENT OF CULTURAL AFFAIRS AND SPECIAL EVENTS": "#999999",
+    "DEPARTMENT OF ENVIRONMENT": "#999999",
+    "DEPARTMENT OF FAMILY AND SUPPORT SERVICES": "#999999",
+    "DEPARTMENT OF FINANCE": "#999999",
+    "DEPARTMENT OF FLEET AND FACILITY MANAGEMENT": "#999999",
+    "DEPARTMENT OF HOUSING": "#999999",
+    "DEPARTMENT OF HUMAN RESOURCES": "#999999",
+    "DEPARTMENT OF LAW": "#999999",
+    "DEPARTMENT OF PLANNING AND DEVELOPMENT": "#999999",
+    "DEPARTMENT OF PROCUREMENT SERVICES": "#999999",
+    "DEPARTMENT OF STREETS AND SANITATION": "#999999",
+    "DEPARTMENT OF TECHNOLOGY AND INNOVATION": "#999999",
+    "DEPARTMENT OF WATER MANAGEMENT": "#999999",
+    "LICENSE APPEAL COMMISSION": "#999999",
+    "MAYORS OFFICE FOR PEOPLE WITH DISABILITIES": "#999999",
+    "OFFICE OF BUDGET & MANAGEMENT": "#008a07",
+    "OFFICE OF CITY CLERK": "#999999",
+    "OFFICE OF EMERGENCY MANAGEMENT AND COMMUNICATIONS": "#999999",
+    "OFFICE OF INSPECTOR GENERAL": "#999999",
+    "OFFICE OF PUBLIC SAFETY ADMINISTRATION": "#999999",
+    "OFFICE OF THE MAYOR": "#999999",
+}
+
+function getDepartmentColor(department) {
+    return departmentColors[department] || "#999999";
+}
