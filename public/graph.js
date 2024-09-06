@@ -41,7 +41,6 @@ window.onload = function () {
                 hoveredNeighbors: undefined,
             };
 
-            // Function to handle hovering on nodes
             function setHoveredNode(node) {
                 if (node) {
                     state.hoveredNode = node;
@@ -53,40 +52,94 @@ window.onload = function () {
                 renderer.refresh({ skipIndexation: true });
             }
 
+            function setSelectedNode(node) {
+                if (state.selectedNode === node) {
+                    // Deselect the node if already selected
+                    state.selectedNode = undefined;
+                } else {
+                    state.selectedNode = node;
+                }
+                renderer.refresh({ skipIndexation: true });
+            }
+
             // Handle node hover events
             renderer.on("enterNode", ({ node }) => setHoveredNode(node));
             renderer.on("leaveNode", () => setHoveredNode(undefined));
 
-            // Node reducer: dynamically change node appearance based on hover
+            // Handle node click events for selection
+            renderer.on("clickNode", ({ node }) => setSelectedNode(node));
+
+            // Handle clicking on the canvas to deselect nodes
+            renderer.on("clickStage", () => {
+                state.selectedNode = undefined;
+                renderer.refresh({ skipIndexation: true });
+            });
+            
+            // Node reducer: dynamically change node appearance
             renderer.setSetting("nodeReducer", (node, data) => {
                 const res = { ...data };
 
-                // If the node is not hovered and is not a neighbor of the hovered node, dim it
-                if (state.hoveredNeighbors && !state.hoveredNeighbors.has(node) && state.hoveredNode !== node) {
-                    res.label = "";
-                    res.color = "#f6f6f6";
+                // If there is a selected node
+                if (state.selectedNode) {
+                    // Dim nodes that are not the selected node or its neighbors
+                    if (state.selectedNode !== node && !graph.neighbors(state.selectedNode).includes(node)) {
+                        res.label = "";
+                        res.color = "#f6f6f6";
+                    }
+                    // Show additional information for the selected node
+                    if (state.selectedNode === node) {
+                        res.highlighted = true;
+                        const position = graph.getNodeAttribute(node, "position");
+                        const department = graph.getNodeAttribute(node, "department");
+                        if (position && position !== "") {
+                            res.label = `${data.label} | ${position} | ${department}`;
+                        }
+                    }
                 }
-                // If hovered node
-                if (state.hoveredNode === node) {
-                    res.highlighted = true;
-                    // Display position and department on the label
-                    const position = graph.getNodeAttribute(node, "position");
-                    const department = graph.getNodeAttribute(node, "department");
-                    if (position && position != "")
-                        res.label = `${data.label} | ${position} | ${department}`;
+                // If no node is selected, handle hover behavior
+                else if (state.hoveredNode) {
+                    // Dim nodes that are not the hovered node or its neighbors
+                    if (state.hoveredNode !== node && !state.hoveredNeighbors.has(node)) {
+                        res.label = "";
+                        res.color = "#f6f6f6";
+                    }
+                    // Show additional information for the hovered node
+                    if (state.hoveredNode === node) {
+                        res.highlighted = true;
+                        const position = graph.getNodeAttribute(node, "position");
+                        const department = graph.getNodeAttribute(node, "department");
+                        if (position && position !== "") {
+                            res.label = `${data.label} | ${position} | ${department}`;
+                        }
+                    }
                 }
 
                 return res;
             });
+
 
             // Edge reducer: dynamically hide edges not connected to hovered or selected nodes
             renderer.setSetting("edgeReducer", (edge, data) => {
                 const res = { ...data };
-                if (state.hoveredNode && !graph.hasExtremity(edge, state.hoveredNode)) {
-                    res.hidden = true;
+
+                // If there is a selected node
+                if (state.selectedNode) {
+                    // Show edges that are connected to the selected node
+                    if (!graph.hasExtremity(edge, state.selectedNode)) {
+                        res.hidden = true;
+                    }
                 }
+                // If no node is selected, handle hover behavior
+                else if (state.hoveredNode) {
+                    // Show edges that are connected to the hovered node
+                    if (!graph.hasExtremity(edge, state.hoveredNode)) {
+                        res.hidden = true;
+                    }
+                }
+
                 return res;
             });
+
 
         })
         .catch(error => console.error('Error loading the graph data:', error));
