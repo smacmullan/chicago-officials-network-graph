@@ -9,8 +9,8 @@ window.onload = function () {
             data.nodes.forEach(node => {
                 graph.addNode(node.id, {
                     label: node.label,
-                    position: "Position",
-                    department: "Department",
+                    // position: "Position",
+                    // department: "Department",
                     x: Math.random(),
                     y: Math.random(),
                     size: 5,
@@ -38,16 +38,13 @@ window.onload = function () {
             const state = {
                 hoveredNode: undefined,
                 selectedNode: undefined,
-                hoveredNeighbors: undefined,
             };
 
             function setHoveredNode(node) {
                 if (node) {
                     state.hoveredNode = node;
-                    state.hoveredNeighbors = new Set(graph.neighbors(node));
                 } else {
                     state.hoveredNode = undefined;
-                    state.hoveredNeighbors = undefined;
                 }
                 renderer.refresh({ skipIndexation: true });
             }
@@ -74,18 +71,13 @@ window.onload = function () {
                 state.selectedNode = undefined;
                 renderer.refresh({ skipIndexation: true });
             });
-            
+
             // Node reducer: dynamically change node appearance
             renderer.setSetting("nodeReducer", (node, data) => {
                 const res = { ...data };
 
                 // If there is a selected node
                 if (state.selectedNode) {
-                    // Dim nodes that are not the selected node or its neighbors
-                    if (state.selectedNode !== node && !graph.neighbors(state.selectedNode).includes(node)) {
-                        res.label = "";
-                        res.color = "#f6f6f6";
-                    }
                     // Show additional information for the selected node
                     if (state.selectedNode === node) {
                         res.highlighted = true;
@@ -95,14 +87,28 @@ window.onload = function () {
                             res.label = `${data.label} | ${position} | ${department}`;
                         }
                     }
-                }
-                // If no node is selected, handle hover behavior
-                else if (state.hoveredNode) {
-                    // Dim nodes that are not the hovered node or its neighbors
-                    if (state.hoveredNode !== node && !state.hoveredNeighbors.has(node)) {
+                    // Show the labels of neighboring nodes without highlighting them
+                    else if (state.selectedNode && graph.neighbors(state.selectedNode).includes(node)) {
+                        res.forceLabel = true;
+                    }
+                    // Hovering over a neighbor node will show its neighbors
+                    else if (state.hoveredNode
+                        && graph.neighbors(state.selectedNode).includes(state.hoveredNode)
+                        && graph.neighbors(state.hoveredNode).includes(node)) {
+                        res.forceLabel = true;
+                    }
+                    // Show the label of a hovered, non-neighbor node; node stays dim
+                    else if (state.hoveredNode && state.hoveredNode === node) {
+                        res.color = "#f6f6f6";
+                    }
+                    // Dim nodes that are not the selected node or its neighbors
+                    else {
                         res.label = "";
                         res.color = "#f6f6f6";
                     }
+                }
+                // If no node is selected, handle hover behavior
+                else if (state.hoveredNode) {
                     // Show additional information for the hovered node
                     if (state.hoveredNode === node) {
                         res.highlighted = true;
@@ -111,6 +117,15 @@ window.onload = function () {
                         if (position && position !== "") {
                             res.label = `${data.label} | ${position} | ${department}`;
                         }
+                    }
+                    // Show the labels of neighboring nodes without highlighting them
+                    else if (state.hoveredNode && graph.neighbors(state.hoveredNode).includes(node)) {
+                        res.forceLabel = true;
+                    }
+                    // Dim nodes that are not the hovered node or its neighbors
+                    else {
+                        res.label = "";
+                        res.color = "#f6f6f6";
                     }
                 }
 
@@ -124,8 +139,14 @@ window.onload = function () {
 
                 // If there is a selected node
                 if (state.selectedNode) {
-                    // Show edges that are connected to the selected node
-                    if (!graph.hasExtremity(edge, state.selectedNode)) {
+                    // Hovering over selected node's neighbor shows all of its edges
+                    if (state.hoveredNode 
+                        && graph.neighbors(state.selectedNode).includes(state.hoveredNode)
+                        && graph.hasExtremity(edge, state.hoveredNode)) {
+                        res.hidden = false;
+                    }
+                    // Hide all edges not connected to selected node or hovered neighbor
+                    else if (!graph.hasExtremity(edge, state.selectedNode)) {
                         res.hidden = true;
                     }
                 }
