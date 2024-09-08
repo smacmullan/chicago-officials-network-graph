@@ -4,7 +4,7 @@ The [Chicago Officials Network Graph](https://smacmullan.github.io/chicago-offic
 The current network graph is based on a small sample of data focused on the Office of Budget and Management.
 
 # Running the project
-This project uses Python to convert the raw email data into network data. Run the `emails_to_network.py` script to convert the data and save it to `public/graph-data.json`.
+This project uses Python to convert the raw email data into network data. Run the `scripts/emails_to_network.py` script to convert the data and save it to `public/graph-data.json`.
 
 The network graph is built with [sigma.js](https://www.sigmajs.org/). The graph is configured in `public/graph.js`. You can view the graph locally by running a web server that serves `index.html` (I'm using the Live Server feature in VS Code). This project is using GitHub Pages on the repository to host the graph as a static site.
 

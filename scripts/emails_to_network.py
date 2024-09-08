@@ -2,10 +2,10 @@ import pandas as pd
 import json
 
 # Load the CSV file for email data
-df = pd.read_csv('data/OBM sample email data.csv')
+df = pd.read_csv('./data/OBM sample email data.csv')
 
 # Load the CSV file for employee data
-employee_df = pd.read_csv('data/Chicago_Current_Employees_20240904.csv')
+employee_df = pd.read_csv('./data/Chicago_Current_Employees_20240904.csv')
 
 # Split the "Name" column into "last_name" and "first_name"
 def split_name(name):
@@ -19,7 +19,15 @@ employee_df[['last_name', 'first_name']] = employee_df['Name'].apply(lambda name
 
 
 def get_employee_info(name):
+
+    # convert Chicago email addresses to names
+    if "@cityofchicago.org" in name:
+        name = name.replace("'", "")
+        name = name.replace("@cityofchicago.org", "")
+        name = name.replace(".", " ")
+
     standardized_name = name.strip().upper().split()
+
     if len(standardized_name) < 2:
         # assume non-person name (email address, email group, application name, etc)
         return {'position': None, 'department': None, 'salary': None}
@@ -84,5 +92,5 @@ graph_data = {
 }
 
 # Save to a JSON file for use with sigma.js
-with open('public/graph-data.json', 'w') as f:
+with open('./public/graph-data.json', 'w') as f:
     json.dump(graph_data, f, indent=4)
