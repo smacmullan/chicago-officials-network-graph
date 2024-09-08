@@ -9,12 +9,12 @@ window.onload = function () {
             data.nodes.forEach(node => {
                 graph.addNode(node.id, {
                     label: node.label,
-                    // position: "Position",
-                    // department: "Department",
+                    position: node.position || null,
+                    department: node.department || null,
                     x: Math.random(),
                     y: Math.random(),
                     size: 5,
-                    // color: getDepartmentColor("BOARD OF ETHICS"),
+                    color: getDepartmentColor(node.department || null),
                 });
             });
             data.edges.forEach(edge => {
@@ -87,19 +87,26 @@ window.onload = function () {
                             res.label = `${data.label} | ${position} | ${department}`;
                         }
                     }
+                    // Show the label of a hovered node
+                    else if (state.hoveredNode && state.hoveredNode === node) {
+                        const position = graph.getNodeAttribute(node, "position");
+                        const department = graph.getNodeAttribute(node, "department");
+                        if (position && position !== "") {
+                            res.label = `${data.label} | ${position} | ${department}`;
+                        }
+
+                        // keep hovered node dim if non-neighbor
+                        if (!graph.neighbors(state.selectedNode).includes(node))
+                            res.color = "#f6f6f6";
+                    }
                     // Show the labels of neighboring nodes without highlighting them
-                    else if (state.selectedNode && graph.neighbors(state.selectedNode).includes(node)) {
+                    else if (graph.neighbors(state.selectedNode).includes(node)) {
                         res.forceLabel = true;
                     }
                     // Hovering over a neighbor node will show its neighbors
-                    else if (state.hoveredNode
-                        && graph.neighbors(state.selectedNode).includes(state.hoveredNode)
+                    else if (graph.neighbors(state.selectedNode).includes(state.hoveredNode)
                         && graph.neighbors(state.hoveredNode).includes(node)) {
                         res.forceLabel = true;
-                    }
-                    // Show the label of a hovered, non-neighbor node; node stays dim
-                    else if (state.hoveredNode && state.hoveredNode === node) {
-                        res.color = "#f6f6f6";
                     }
                     // Dim nodes that are not the selected node or its neighbors
                     else {
@@ -119,7 +126,7 @@ window.onload = function () {
                         }
                     }
                     // Show the labels of neighboring nodes without highlighting them
-                    else if (state.hoveredNode && graph.neighbors(state.hoveredNode).includes(node)) {
+                    else if (graph.neighbors(state.hoveredNode).includes(node)) {
                         res.forceLabel = true;
                     }
                     // Dim nodes that are not the hovered node or its neighbors
@@ -140,7 +147,7 @@ window.onload = function () {
                 // If there is a selected node
                 if (state.selectedNode) {
                     // Hovering over selected node's neighbor shows all of its edges
-                    if (state.hoveredNode 
+                    if (state.hoveredNode
                         && graph.neighbors(state.selectedNode).includes(state.hoveredNode)
                         && graph.hasExtremity(edge, state.hoveredNode)) {
                         res.hidden = false;
