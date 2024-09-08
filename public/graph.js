@@ -13,7 +13,7 @@ window.onload = function () {
                     department: node.department || null,
                     x: Math.random(),
                     y: Math.random(),
-                    size: 5,
+                    size: mapSalarytoSize(node.salary),
                     color: getDepartmentColor(node.department || null),
                 });
             });
@@ -25,12 +25,17 @@ window.onload = function () {
             graphologyLibrary.layoutForceAtlas2.assign(graph, {
                 iterations: 100,
                 settings: {
-                    gravity: 10
+                    gravity: 5
                 }
             });
 
             // Instantiate sigma.js and render the graph
-            const renderer = new Sigma(graph, document.getElementById("sigma-container"));
+            const renderer = new Sigma(graph, document.getElementById("sigma-container"),
+                {
+                    labelDensity: 0.10, // Controls how many labels are shown at once (smaller = fewer labels) 
+                    // labelGridCellSize: 100,  // Increase to reduce number of display labels in small area
+                }
+            );
 
 
 
@@ -174,37 +179,37 @@ window.onload = function () {
 };
 
 const departmentColors = {
-    "BOARD OF ELECTION COMMISSIONERS": "#FF5733",
-    "BOARD OF ETHICS": "#33FF57",
-    "CHICAGO ANIMAL CARE AND CONTROL": "#5733FF",
-    "CHICAGO COMMISSION ON HUMAN RELATIONS": "#FF33A5",
-    "CHICAGO DEPARTMENT OF AVIATION": "#33A5FF",
-    "CHICAGO DEPARTMENT OF PUBLIC HEALTH": "#FF9933",
-    "CHICAGO DEPARTMENT OF TRANSPORTATION": "#9933FF",
+    "BOARD OF ELECTION COMMISSIONERS": "#32964d",
+    "BOARD OF ETHICS": "#6bdd8c",
+    "CHICAGO ANIMAL CARE AND CONTROL": "#284e37",
+    "CHICAGO COMMISSION ON HUMAN RELATIONS": "#82d1f4",
+    "CHICAGO DEPARTMENT OF AVIATION": "#4e2da6",
+    "CHICAGO DEPARTMENT OF PUBLIC HEALTH": "#ac80c6",
+    "CHICAGO DEPARTMENT OF TRANSPORTATION": "#9e1fff",
     "CHICAGO FIRE DEPARTMENT": "#ff2121",
-    "CHICAGO POLICE BOARD": "#999999",
+    "CHICAGO POLICE BOARD": "#e057e1",
     "CHICAGO POLICE DEPARTMENT": "#3f55ff",
-    "CHICAGO PUBLIC LIBRARY": "#999999",
-    "CITY COUNCIL": "#999999",
-    "CITY TREASURER'S OFFICE": "#999999",
-    "CIVILIAN OFFICE OF POLICE ACCOUNTABILITY": "#999999",
-    "COMMUNITY COMMISSION FOR PUBLIC SAFETY AND ACCOUNTABILITY": "#999999",
+    "CHICAGO PUBLIC LIBRARY": "#048ad1",
+    "CITY COUNCIL": "#1e438d",
+    "CITY TREASURER'S OFFICE": "#eec8f1",
+    "CIVILIAN OFFICE OF POLICE ACCOUNTABILITY": "#7212ff",
+    "COMMUNITY COMMISSION FOR PUBLIC SAFETY AND ACCOUNTABILITY": "#b9cf84",
     "DEPARTMENT OF ADMINISTRATIVE HEARING": "#999999",
-    "DEPARTMENT OF BUILDINGS": "#999999",
-    "DEPARTMENT OF BUSINESS AFFAIRS AND CONSUMER PROTECTION": "#999999",
-    "DEPARTMENT OF CULTURAL AFFAIRS AND SPECIAL EVENTS": "#999999",
-    "DEPARTMENT OF ENVIRONMENT": "#999999",
-    "DEPARTMENT OF FAMILY AND SUPPORT SERVICES": "#999999",
-    "DEPARTMENT OF FINANCE": "#999999",
-    "DEPARTMENT OF FLEET AND FACILITY MANAGEMENT": "#999999",
+    "DEPARTMENT OF BUILDINGS": "#84ee15",
+    "DEPARTMENT OF BUSINESS AFFAIRS AND CONSUMER PROTECTION": "#9f2114",
+    "DEPARTMENT OF CULTURAL AFFAIRS AND SPECIAL EVENTS": "#fea27a",
+    "DEPARTMENT OF ENVIRONMENT": "#ff1c5d",
+    "DEPARTMENT OF FAMILY AND SUPPORT SERVICES": "#fbd127",
+    "DEPARTMENT OF FINANCE": "#7f8861",
+    "DEPARTMENT OF FLEET AND FACILITY MANAGEMENT": "#ff66d4",
     "DEPARTMENT OF HOUSING": "#999999",
     "DEPARTMENT OF HUMAN RESOURCES": "#999999",
     "DEPARTMENT OF LAW": "#999999",
     "DEPARTMENT OF PLANNING AND DEVELOPMENT": "#999999",
     "DEPARTMENT OF PROCUREMENT SERVICES": "#999999",
     "DEPARTMENT OF STREETS AND SANITATION": "#999999",
-    "DEPARTMENT OF TECHNOLOGY AND INNOVATION": "#999999",
-    "DEPARTMENT OF WATER MANAGEMENT": "#999999",
+    "DEPARTMENT OF TECHNOLOGY AND INNOVATION": "#1fff8f",
+    "DEPARTMENT OF WATER MANAGEMENT": "#683c00",
     "LICENSE APPEAL COMMISSION": "#999999",
     "MAYORS OFFICE FOR PEOPLE WITH DISABILITIES": "#999999",
     "OFFICE OF BUDGET & MANAGEMENT": "#008a07",
@@ -212,9 +217,23 @@ const departmentColors = {
     "OFFICE OF EMERGENCY MANAGEMENT AND COMMUNICATIONS": "#999999",
     "OFFICE OF INSPECTOR GENERAL": "#999999",
     "OFFICE OF PUBLIC SAFETY ADMINISTRATION": "#999999",
-    "OFFICE OF THE MAYOR": "#999999",
+    "OFFICE OF THE MAYOR": "#fff700",
 }
 
 function getDepartmentColor(department) {
     return departmentColors[department] || "#999999";
+}
+
+const MIN_SALARY = 20000;
+const MEDIAN_SALARY = 100000;
+const MAX_SALARY = 300000;
+const MIN_POINT_SIZE = 2;
+const MAX_POINT_SIZE = 10;
+
+
+function mapSalarytoSize(salary) {
+    if (!salary)
+        return 2;
+
+    return (salary - MIN_SALARY) / (MAX_SALARY - MIN_SALARY) * (MAX_POINT_SIZE - MIN_POINT_SIZE) + MIN_POINT_SIZE;
 }
