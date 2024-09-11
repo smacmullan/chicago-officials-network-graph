@@ -34,6 +34,7 @@ window.onload = function () {
                 {
                     labelDensity: 0.10, // Controls how many labels are shown at once (smaller = fewer labels) 
                     // labelGridCellSize: 100,  // Increase to reduce number of display labels in small area
+                    hoverRenderer: drawHover,
                 }
             );
 
@@ -86,20 +87,9 @@ window.onload = function () {
                     // Show additional information for the selected node
                     if (state.selectedNode === node) {
                         res.highlighted = true;
-                        const position = graph.getNodeAttribute(node, "position");
-                        const department = graph.getNodeAttribute(node, "department");
-                        if (position && position !== "") {
-                            res.label = `${data.label} | ${position} | ${department}`;
-                        }
                     }
                     // Show the label of a hovered node
                     else if (state.hoveredNode && state.hoveredNode === node) {
-                        const position = graph.getNodeAttribute(node, "position");
-                        const department = graph.getNodeAttribute(node, "department");
-                        if (position && position !== "") {
-                            res.label = `${data.label} | ${position} | ${department}`;
-                        }
-
                         // keep hovered node dim if non-neighbor
                         if (!graph.neighbors(state.selectedNode).includes(node))
                             res.color = "#f6f6f6";
@@ -124,11 +114,6 @@ window.onload = function () {
                     // Show additional information for the hovered node
                     if (state.hoveredNode === node) {
                         res.highlighted = true;
-                        const position = graph.getNodeAttribute(node, "position");
-                        const department = graph.getNodeAttribute(node, "department");
-                        if (position && position !== "") {
-                            res.label = `${data.label} | ${position} | ${department}`;
-                        }
                     }
                     // Show the labels of neighboring nodes without highlighting them
                     else if (graph.neighbors(state.hoveredNode).includes(node)) {
@@ -208,7 +193,7 @@ const departmentColors = {
     "DEPARTMENT OF PLANNING AND DEVELOPMENT": "#999999",
     "DEPARTMENT OF PROCUREMENT SERVICES": "#999999",
     "DEPARTMENT OF STREETS AND SANITATION": "#999999",
-    "DEPARTMENT OF TECHNOLOGY AND INNOVATION": "#1fff8f",
+    "DEPARTMENT OF TECHNOLOGY AND INNOVATION": "#11fa86",
     "DEPARTMENT OF WATER MANAGEMENT": "#683c00",
     "LICENSE APPEAL COMMISSION": "#999999",
     "MAYORS OFFICE FOR PEOPLE WITH DISABILITIES": "#999999",
@@ -217,7 +202,7 @@ const departmentColors = {
     "OFFICE OF EMERGENCY MANAGEMENT AND COMMUNICATIONS": "#999999",
     "OFFICE OF INSPECTOR GENERAL": "#999999",
     "OFFICE OF PUBLIC SAFETY ADMINISTRATION": "#999999",
-    "OFFICE OF THE MAYOR": "#fff700",
+    "OFFICE OF THE MAYOR": "#e37a02",
 }
 
 function getDepartmentColor(department) {
@@ -236,4 +221,92 @@ function mapSalarytoSize(salary) {
         return 2;
 
     return (salary - MIN_SALARY) / (MAX_SALARY - MIN_SALARY) * (MAX_POINT_SIZE - MIN_POINT_SIZE) + MIN_POINT_SIZE;
+}
+
+const TEXT_COLOR = "#000000";
+function drawRoundRect(
+    ctx,
+    x,
+    y,
+    width,
+    height,
+    radius,
+) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+}
+
+function drawHover(context, data, settings) {
+    const size = settings.labelSize;
+    const font = settings.labelFont;
+    const weight = settings.labelWeight;
+    const subLabelSize = size - 2;
+
+    const label = data.label;
+    const departmentLabel = data.department || "";
+    const positionLabel = data.position || "";
+
+    // Draw the label background
+    context.beginPath();
+    context.fillStyle = "#fff";
+    context.shadowOffsetX = 0;
+    context.shadowOffsetY = 2;
+    context.shadowBlur = 8;
+    context.shadowColor = "#000";
+
+    context.font = `${weight} ${size}px ${font}`;
+    const labelWidth = context.measureText(label).width;
+    context.font = `${weight} ${subLabelSize}px ${font}`;
+    const departmentLabelWidth = departmentLabel ? context.measureText(departmentLabel).width : 0;
+    context.font = `${weight} ${subLabelSize}px ${font}`;
+    const positionLabelWidth = positionLabel ? context.measureText(positionLabel).width : 0;
+
+    const textWidth = Math.max(labelWidth, departmentLabelWidth, positionLabelWidth);
+
+    const x = Math.round(data.x);
+    const y = Math.round(data.y);
+    const w = Math.round(textWidth + size / 2 + data.size + 3);
+    const hLabel = Math.round(size / 2 + 4);
+    const hDepartmentLabel = departmentLabel ? Math.round(subLabelSize / 2 + 9) : 0;
+    const hPositionLabel = positionLabel? Math.round(subLabelSize / 2 + 9) : 0;
+
+    drawRoundRect(context, x, y - hDepartmentLabel - 12, w, hPositionLabel + hLabel + hDepartmentLabel + 12, 5);
+    context.closePath();
+    context.fill();
+
+    context.shadowOffsetX = 0;
+    context.shadowOffsetY = 0;
+    context.shadowBlur = 0;
+
+    // Draw the labels
+    if (departmentLabel) {
+        // draw name with sub-labels
+        context.fillStyle = TEXT_COLOR;
+        context.font = `${weight} ${size}px ${font}`;
+        context.fillText(label, data.x + data.size + 3, data.y - (2 * size) / 3 - 2);
+
+        context.fillStyle = TEXT_COLOR;
+        context.font = `${weight} ${subLabelSize}px ${font}`;
+        context.fillText(positionLabel, data.x + data.size + 3, data.y + size / 3);
+        
+        context.fillStyle = data.color; // use to color text with node color
+        context.font = `${weight} ${subLabelSize}px ${font}`;
+        context.fillText(departmentLabel, data.x + data.size + 3, data.y + size / 3 + 3 + subLabelSize);
+    }
+    else{
+        // center name vertically with no sub-labels
+        context.fillStyle = TEXT_COLOR;
+        context.font = `${weight} ${size}px ${font}`;
+        context.fillText(label, data.x + data.size + 3, data.y + size / 3);
+    }
+
 }
